@@ -67,6 +67,27 @@ namespace Wizdom.Plugin.Helpers
         private const string SearchUrl = $"{ApiBaseUrl}/search";
         private const string DownloadUrl = $"{ApiBaseUrl}/files/sub";
 
+        public async Task<string> WizdomFreeSearch(string title)
+        {
+            string searchUrl = $"{SearchUrl}?search={title}&page=0";
+            var httpRequest = new HttpRequestOptions();
+            httpRequest.Url = searchUrl;
+            var response = await _httpClient.GetResponse(httpRequest);
+            var initialResponse = _jsonSerializer.DeserializeFromStream<WizdomFreeSearch[]>(response.Content);
+            if (initialResponse != null && initialResponse.Count() > 0)
+            {
+                var match = initialResponse.FirstOrDefault(x =>
+                    string.Equals(x.title, title, StringComparison.Ordinal) ||
+                    string.Equals(x.title_en, title, StringComparison.Ordinal));
+
+                if (match != null && !string.IsNullOrWhiteSpace(match.imdb))
+                {
+                    _logger.Info($"Wizdom: Found IMDB id '{match.imdb}' for title '{title}'.");
+                    return match.imdb;
+                }
+            }
+            return null;
+        }
         public async Task<List<RemoteSubtitleInfo>> GetMovieRemoteSubtitles(string imdbId)
         {
             var results = new List<RemoteSubtitleInfo>();
@@ -76,7 +97,7 @@ namespace Wizdom.Plugin.Helpers
             httpRequest.Url = searchUrl;
             var response = await _httpClient.GetResponse(httpRequest);
             var initialResponse = _jsonSerializer.DeserializeFromStream<WizdomSearch[]>(response.Content);
-            if (initialResponse.Count() > 0)
+            if (initialResponse != null && initialResponse.Count() > 0)
             {
                 foreach (var subtitle in initialResponse)
                 {

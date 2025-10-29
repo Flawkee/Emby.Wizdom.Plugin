@@ -82,22 +82,51 @@ namespace Wizdom.Plugin
 
         private async Task<IEnumerable<RemoteSubtitleInfo>> SearchMovies(SubtitleSearchRequest request, CancellationToken cancellationToken)
         {
-            var imdbId = request.ProviderIds["Imdb"];
+            if (!request.ProviderIds.TryGetValue("Imdb", out var imdbId) || string.IsNullOrWhiteSpace(imdbId))
+            {
+                _logger.Info("Wizdom: Movie IMDB id not provided in request, trying free search.");
+                imdbId = await _WizdomExplorer.WizdomFreeSearch(request.Name);
+            }
 
-            // Search for subtitles
-            _logger.Info($"Wizdom: Searching subtitles for Movie: {request.Name}, ImdbID: {imdbId}");
-            return await _WizdomExplorer.GetMovieRemoteSubtitles(imdbId);
+            if (string.IsNullOrWhiteSpace(imdbId))
+            {
+                _logger.Info("Wizdom: Could not find IMDB id for movie, exiting search.");
+                return Enumerable.Empty<RemoteSubtitleInfo>();
+            }
+            else
+            {
+                // Search for subtitles
+                _logger.Info($"Wizdom: Searching subtitles for Movie: {request.Name}, ImdbID: {imdbId}");
+                return await _WizdomExplorer.GetMovieRemoteSubtitles(imdbId);
+            }
         }
 
         private async Task<IEnumerable<RemoteSubtitleInfo>> SearchEpisodes(SubtitleSearchRequest request, CancellationToken cancellationToken)
         {
             // Get Series IMDB ID
-            var episodeImdbId = request.ProviderIds["Imdb"];
-            var seriesImdbId = await _imdbExplorer.GetSeriesImdbId(episodeImdbId);
+            // Replace the direct index accessor with a safe check
+            string seriesImdbId;
+            if (!request.ProviderIds.TryGetValue("Imdb", out var episodeImdbId) || string.IsNullOrWhiteSpace(episodeImdbId))
+            {
+                _logger.Info("Wizdom: Episode IMDB id not provided in request, trying free search.");
+                seriesImdbId = await _WizdomExplorer.WizdomFreeSearch(request.SeriesName);
+            }
+            else
+            {
+                seriesImdbId = await _imdbExplorer.GetSeriesImdbId(episodeImdbId);
+            }
 
-            // Search for subtitles
-            _logger.Info($"Wizdom: Searching subtitles for Series: {request.SeriesName}, Season: {request.ParentIndexNumber}, Episode: {request.IndexNumber}, ImdbID: {seriesImdbId}");
-            return await _WizdomExplorer.GetSeriesRemoteSubtitles(seriesImdbId, request.ParentIndexNumber, request.IndexNumber);
+            if (string.IsNullOrWhiteSpace(seriesImdbId))
+            {
+                _logger.Info("Wizdom: Could not find IMDB id for series, exiting search.");
+                return Enumerable.Empty<RemoteSubtitleInfo>();
+            }
+            else
+            {
+                // Search for subtitles
+                _logger.Info($"Wizdom: Searching subtitles for Series: {request.SeriesName}, Season: {request.ParentIndexNumber}, Episode: {request.IndexNumber}, ImdbID: {seriesImdbId}");
+                return await _WizdomExplorer.GetSeriesRemoteSubtitles(seriesImdbId, request.ParentIndexNumber, request.IndexNumber);
+            }
         }
 
         public async Task<SubtitleResponse> GetSubtitles(string id, CancellationToken cancellationToken)
