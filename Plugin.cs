@@ -27,7 +27,7 @@ namespace Wizdom.Plugin
         public override sealed string Name => PluginName;
 
         public static string PluginName = "Wizdom";
-        public override Guid Id => new Guid("1c7b36cb-db0a-4a57-ab22-b8fedccde0a5");
+        public override Guid Id => new Guid("55A162B3-B849-41FA-9171-B0D919CE99E9");
         public override string Description => "Downloads Hebrew subtitles from wizdom.xyz";
         public static Plugin Instance { get; private set; }
         public PluginConfiguration Options => this.GetOptions();

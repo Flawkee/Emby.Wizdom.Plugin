@@ -7,9 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-	<Version>1.1.0.0</Version>
+	<Version>1.1.0.1</Version>
 	<Authors>Flawkee</Authors>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<GeneratedAssemblyInfoFile>assemblyinfo.cs</GeneratedAssemblyInfoFile>
   </PropertyGroup>
 
   <ItemGroup>
