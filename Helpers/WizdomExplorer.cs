@@ -63,7 +63,8 @@ namespace Wizdom.Plugin.Helpers
             }
         }
 
-        private const string ApiBaseUrl = "https://wizdom.xyz/api";
+        private const string BaseUrl = "https://wizdom.xyz";
+        private const string ApiBaseUrl = $"{BaseUrl}/api";
         private const string SearchUrl = $"{ApiBaseUrl}/search";
         private const string DownloadUrl = $"{ApiBaseUrl}/files/sub";
 
@@ -246,6 +247,34 @@ namespace Wizdom.Plugin.Helpers
             {
                 _logger.Error($"Wizdom: failed downloading/extracting subtitle ID: {id}. {ex}");
                 return null;
+            }
+        }
+        public bool WizdomAccessValidation()
+        {
+            try
+            {
+                var httpRequest = new HttpRequestOptions();
+                httpRequest.Url = BaseUrl;
+                var requestTimeout = Plugin.Instance.Options.requestTimeout ?? 2;
+                httpRequest.TimeoutMs = requestTimeout * 1000; // in milliseconds
+                var responseTask = _httpClient.GetResponse(httpRequest);
+                responseTask.Wait(); // Block until complete
+                var response = responseTask.Result;
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    _logger.Info("Wizdom: Access validation successful.");
+                    return true;
+                }
+                else
+                {
+                    _logger.Error($"Wizdom: Access validation failed with status code {response.StatusCode}. Wizdom might not be available.");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Wizdom: Access validation failed. Wizdom might not be available: {ex}");
+                return false;
             }
         }
     }

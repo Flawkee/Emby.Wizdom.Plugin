@@ -53,7 +53,13 @@ namespace Wizdom.Plugin
             }
             else
             {
-                _logger.Info($"Wizdom: Hebrew subtitle search was initiated");
+                _logger.Info($"Wizdom: Hebrew subtitle search was initiated. Validating Wizdom is available");
+                var accessStatus = _WizdomExplorer.WizdomAccessValidation();
+                if (!accessStatus)
+                {
+                    _logger.Warn($"Wizdom: Wizdom.xyz is not reachable. Exiting subtitle search.");
+                    return Enumerable.Empty<RemoteSubtitleInfo>();
+                }
             }
 
             try
