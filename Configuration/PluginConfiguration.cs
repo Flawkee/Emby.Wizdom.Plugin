@@ -19,7 +19,7 @@ namespace Wizdom.Plugin.Configuration
         public override string EditorDescription => "Automatically downloads Hebrew subtitles from wizdom.xyz.\n\n";
 
         [DisplayName("Wizdom Request Timeout")]
-        [Description("Request Timeout (in seconds): If not configured, the default is 2 seconds. This should be set and saved before setting up username and password. This setting is helpful if Wizdom.xyz is unavailable, ensuring that subtitle search doesn't wait the full 30 seconds (the Emby default) before returning a response.")]
+        [Description("Request Timeout (in seconds): If not configured, the default is 2 seconds. This setting is helpful if Wizdom.xyz is unavailable, ensuring that subtitle search doesn't wait the full 30 seconds (the Emby default) before returning a response.")]
         public int? requestTimeout { get; set; }
 
         protected override void Validate(ValidationContext context)
