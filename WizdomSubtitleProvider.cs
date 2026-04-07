@@ -16,7 +16,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,6 +119,11 @@ namespace Wizdom.Plugin
             else
             {
                 seriesImdbId = await _imdbExplorer.GetSeriesImdbId(episodeImdbId);
+                if (string.IsNullOrWhiteSpace(seriesImdbId))
+                {
+                    _logger.Info("Wizdom: Could not resolve series IMDB ID from episode, trying free search.");
+                    seriesImdbId = await _WizdomExplorer.WizdomFreeSearch(request.SeriesName);
+                }
             }
 
             if (string.IsNullOrWhiteSpace(seriesImdbId))
